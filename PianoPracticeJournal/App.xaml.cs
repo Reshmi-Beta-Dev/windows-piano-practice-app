@@ -79,6 +79,10 @@ public partial class App : Application
             else
             {
                 mainWindow.Show();
+                mainWindow.Activate();
+                mainWindow.Topmost = true;
+                mainWindow.Topmost = false;
+                mainWindow.Focus();
             }
 
             // Start MIDI service
