@@ -1,5 +1,7 @@
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using Hardcodet.Wpf.TaskbarNotification;
 using Microsoft.Extensions.Logging;
 using PianoPracticeJournal.Commands;
@@ -29,6 +31,9 @@ public class SystemTrayService : ISystemTrayService
             
             // Create system tray icon
             _taskbarIcon = new TaskbarIcon();
+            
+            // Set custom icon
+            _taskbarIcon.IconSource = CreateTrayIcon();
             
             // Set up context menu
             var contextMenu = CreateContextMenu();
@@ -142,17 +147,19 @@ public class SystemTrayService : ISystemTrayService
 
     private void OnMainWindowStateChanged(object? sender, EventArgs e)
     {
+        // Only hide to tray if minimize to tray is enabled
         if (_mainWindow?.WindowState == WindowState.Minimized)
         {
-            HideToTray();
+            // Don't automatically hide to tray on minimize - let user control this
+            _logger.LogDebug("Main window minimized");
         }
     }
 
     private void OnMainWindowClosing(object? sender, System.ComponentModel.CancelEventArgs e)
     {
-        // Cancel the close event and hide to tray instead
-        e.Cancel = true;
-        HideToTray();
+        // Only hide to tray on close if minimize to tray is enabled in settings
+        // For now, allow normal close behavior
+        _logger.LogDebug("Main window closing");
     }
 
     private void ExitApplication()
@@ -191,5 +198,34 @@ public class SystemTrayService : ISystemTrayService
                 _logger.LogError(ex, "Error disposing system tray");
             }
         }
+    }
+
+    private BitmapSource CreateTrayIcon()
+    {
+        // Create a 16x16 icon with a white piano symbol on transparent background
+        // This will be visible in both light and dark modes
+        var drawingVisual = new DrawingVisual();
+        
+        using (var drawingContext = drawingVisual.RenderOpen())
+        {
+            // Set background as transparent
+            drawingContext.DrawRectangle(Brushes.Transparent, null, new Rect(0, 0, 16, 16));
+            
+            // Draw a simple white piano icon (keyboard shape)
+            var whitePen = new Pen(Brushes.White, 1.5);
+            
+            // Piano keys outline
+            drawingContext.DrawRectangle(null, whitePen, new Rect(2, 4, 12, 8));
+            
+            // Black keys
+            drawingContext.DrawRectangle(Brushes.White, null, new Rect(4, 4, 1.5, 4));
+            drawingContext.DrawRectangle(Brushes.White, null, new Rect(7, 4, 1.5, 4));
+            drawingContext.DrawRectangle(Brushes.White, null, new Rect(10.5, 4, 1.5, 4));
+        }
+        
+        var renderTargetBitmap = new RenderTargetBitmap(16, 16, 96, 96, PixelFormats.Pbgra32);
+        renderTargetBitmap.Render(drawingVisual);
+        
+        return renderTargetBitmap;
     }
 }
