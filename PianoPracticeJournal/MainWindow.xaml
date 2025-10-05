@@ -1,0 +1,211 @@
+<Window x:Class="PianoPracticeJournal.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="Piano Practice Journal" Height="600" Width="800"
+        WindowStartupLocation="CenterScreen">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Border Grid.Row="0" Background="#2E3440" Padding="10">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="🎹" FontSize="24" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                <TextBlock Text="Piano Practice Journal" FontSize="18" FontWeight="Bold" 
+                          Foreground="White" VerticalAlignment="Center"/>
+                <TextBlock x:Name="StatusText" Text="Stopped" FontSize="12" 
+                          Foreground="#88C999" VerticalAlignment="Center" Margin="20,0,0,0"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Main Content -->
+        <TabControl Grid.Row="1" Margin="10">
+            <!-- Sessions Tab -->
+            <TabItem Header="Practice Sessions">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Current Session Info -->
+                    <Border Grid.Row="0" Background="#ECEFF4" Padding="10" Margin="0,0,0,10">
+                        <StackPanel>
+                            <TextBlock Text="Current Session" FontWeight="Bold" FontSize="14"/>
+                            <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                                <TextBlock Text="Status: "/>
+                                <TextBlock x:Name="CurrentSessionStatus" Text="No active session" FontWeight="Bold"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                                <TextBlock Text="Start Time: "/>
+                                <TextBlock x:Name="CurrentSessionStartTime" Text="--"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                                <TextBlock Text="Duration: "/>
+                                <TextBlock x:Name="CurrentSessionDuration" Text="--"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Sessions List -->
+                    <ListView Grid.Row="1" x:Name="SessionsListView" 
+                              ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                        <ListView.View>
+                            <GridView>
+                                <GridViewColumn Header="Start Time" Width="150">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding StartTime, StringFormat='MM/dd/yyyy HH:mm:ss'}" 
+                                                       TextWrapping="Wrap"/>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                                <GridViewColumn Header="Duration" Width="100">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Duration, StringFormat='hh\\:mm\\:ss'}" 
+                                                       TextWrapping="Wrap"/>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                                <GridViewColumn Header="Synced" Width="80">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding IsSynced}" 
+                                                       Foreground="{Binding IsSynced, Converter={StaticResource BooleanToColorConverter}}"
+                                                       TextWrapping="Wrap"/>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                                <GridViewColumn Header="Sync Error" Width="200">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding SyncError}" 
+                                                       TextWrapping="Wrap" TextTrimming="CharacterEllipsis"/>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
+
+                    <!-- Sync Controls -->
+                    <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,10,0,0">
+                        <Button x:Name="SyncAllButton" Content="Sync All Unsynced" 
+                                Padding="10,5" Margin="0,0,10,0" Click="SyncAllButton_Click"/>
+                        <Button x:Name="RefreshButton" Content="Refresh" 
+                                Padding="10,5" Click="RefreshButton_Click"/>
+                        <TextBlock x:Name="SyncStatusText" VerticalAlignment="Center" 
+                                  Margin="20,0,0,0" Foreground="Gray"/>
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+
+            <!-- Settings Tab -->
+            <TabItem Header="Settings">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="20">
+                        <!-- MIDI Settings -->
+                        <GroupBox Header="MIDI Settings" Margin="0,0,0,20">
+                            <StackPanel Margin="10">
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                                    <TextBlock Text="MIDI Device:" Width="120" VerticalAlignment="Center"/>
+                                    <ComboBox x:Name="MidiDeviceComboBox" Width="300" 
+                                             SelectionChanged="MidiDeviceComboBox_SelectionChanged"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                                    <TextBlock Text="Inactivity Timeout:" Width="120" VerticalAlignment="Center"/>
+                                    <TextBox x:Name="InactivityTimeoutTextBox" Width="100" 
+                                            TextChanged="InactivityTimeoutTextBox_TextChanged"/>
+                                    <TextBlock Text="seconds" VerticalAlignment="Center" Margin="5,0,0,0"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </GroupBox>
+
+                        <!-- API Settings -->
+                        <GroupBox Header="API Settings" Margin="0,0,0,20">
+                            <StackPanel Margin="10">
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                                    <TextBlock Text="API Endpoint:" Width="120" VerticalAlignment="Center"/>
+                                    <TextBox x:Name="ApiEndpointTextBox" Width="400" 
+                                            TextChanged="ApiEndpointTextBox_TextChanged"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                                    <TextBlock Text="API Timeout:" Width="120" VerticalAlignment="Center"/>
+                                    <TextBox x:Name="ApiTimeoutTextBox" Width="100" 
+                                            TextChanged="ApiTimeoutTextBox_TextChanged"/>
+                                    <TextBlock Text="seconds" VerticalAlignment="Center" Margin="5,0,0,0"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                                    <Button x:Name="TestApiButton" Content="Test API Connection" 
+                                            Padding="10,5" Click="TestApiButton_Click"/>
+                                    <TextBlock x:Name="ApiTestResult" VerticalAlignment="Center" 
+                                              Margin="10,0,0,0"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </GroupBox>
+
+                        <!-- Application Settings -->
+                        <GroupBox Header="Application Settings" Margin="0,0,0,20">
+                            <StackPanel Margin="10">
+                                <CheckBox x:Name="AutoStartCheckBox" Content="Auto-start with Windows" 
+                                         Checked="AutoStartCheckBox_Changed" Unchecked="AutoStartCheckBox_Changed"/>
+                                <CheckBox x:Name="MinimizeToTrayCheckBox" Content="Minimize to system tray" 
+                                         Checked="MinimizeToTrayCheckBox_Changed" Unchecked="MinimizeToTrayCheckBox_Changed"/>
+                            </StackPanel>
+                        </GroupBox>
+
+                        <!-- Session Statistics -->
+                        <GroupBox Header="Session Statistics">
+                            <StackPanel Margin="10">
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                                    <TextBlock Text="Total Sessions:" Width="150"/>
+                                    <TextBlock x:Name="TotalSessionsText" FontWeight="Bold"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                                    <TextBlock Text="Synced Sessions:" Width="150"/>
+                                    <TextBlock x:Name="SyncedSessionsText" FontWeight="Bold"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                                    <TextBlock Text="Unsynced Sessions:" Width="150"/>
+                                    <TextBlock x:Name="UnsyncedSessionsText" FontWeight="Bold"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                                    <TextBlock Text="Failed Sessions:" Width="150"/>
+                                    <TextBlock x:Name="FailedSessionsText" FontWeight="Bold"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                                    <TextBlock Text="Last Sync:" Width="150"/>
+                                    <TextBlock x:Name="LastSyncText" FontWeight="Bold"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </GroupBox>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+        </TabControl>
+
+        <!-- Status Bar -->
+        <StatusBar Grid.Row="2" Background="#ECEFF4">
+            <StatusBarItem>
+                <TextBlock x:Name="StatusBarText" Text="Ready"/>
+            </StatusBarItem>
+            <StatusBarItem HorizontalAlignment="Right">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="MIDI: "/>
+                    <TextBlock x:Name="MidiStatusText" Text="Disconnected" Foreground="Red"/>
+                    <Separator Margin="10,0"/>
+                    <TextBlock Text="API: "/>
+                    <TextBlock x:Name="ApiStatusText" Text="Unknown" Foreground="Gray"/>
+                </StackPanel>
+            </StatusBarItem>
+        </StatusBar>
+    </Grid>
+</Window>
