@@ -31,6 +31,7 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        System.Diagnostics.Debug.WriteLine("MainWindow constructor called and InitializeComponent completed");
         
         // Initialize with null values - will be set via SetServices method
         _host = null;
@@ -114,7 +115,6 @@ public partial class MainWindow : Window
             ApiEndpointTextBox.Text = _settings.ApiEndpoint;
             ApiTimeoutTextBox.Text = _settings.ApiTimeoutSeconds.ToString();
             AutoStartCheckBox.IsChecked = _settings.AutoStartWithWindows;
-            MinimizeToTrayCheckBox.IsChecked = _settings.MinimizeToTray;
 
             // Load sessions
             await RefreshSessionsAsync();
@@ -364,14 +364,6 @@ public partial class MainWindow : Window
         }
     }
 
-    private void MinimizeToTrayCheckBox_Changed(object sender, RoutedEventArgs e)
-    {
-        if (_settings != null)
-        {
-            _settings.MinimizeToTray = MinimizeToTrayCheckBox.IsChecked == true;
-            // TODO: Implement minimize to tray functionality
-        }
-    }
 
     protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
     {

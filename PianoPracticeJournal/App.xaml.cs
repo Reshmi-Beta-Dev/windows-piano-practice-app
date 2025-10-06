@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
 using PianoPracticeJournal.Models;
 using PianoPracticeJournal.Services;
+using System.Runtime.InteropServices;
 using System.Configuration;
 using System.Data;
 using System.Net.Http;
@@ -18,6 +19,19 @@ public partial class App : Application
 {
     private IHost? _host;
     private ISystemTrayService? _systemTrayService;
+
+    // Windows API methods to force window to foreground
+    [DllImport("user32.dll")]
+    private static extern bool SetForegroundWindow(IntPtr hWnd);
+
+    [DllImport("user32.dll")]
+    private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
+    [DllImport("user32.dll")]
+    private static extern IntPtr GetActiveWindow();
+
+    private const int SW_RESTORE = 9;
+    private const int SW_SHOW = 5;
 
     protected override async void OnStartup(StartupEventArgs e)
     {
@@ -61,25 +75,49 @@ public partial class App : Application
 
             // Create and show main window
             var mainWindow = new MainWindow();
-            mainWindow.SetServices(
-                _host,
-                _host.Services.GetRequiredService<ILogger<MainWindow>>(),
-                _host.Services.GetRequiredService<IMidiService>(),
-                _host.Services.GetRequiredService<ISessionManager>(),
-                _host.Services.GetRequiredService<ISyncService>(),
-                _host.Services.GetRequiredService<AppSettings>());
-            _systemTrayService.Initialize(mainWindow);
+            logger.LogInformation("MainWindow created successfully");
             
-            // Check if we should minimize to tray
-            var settings = _host.Services.GetRequiredService<AppSettings>();
-            if (settings.MinimizeToTray)
-            {
-                _systemTrayService.HideToTray();
-            }
-            else
-            {
-                mainWindow.Show();
-            }
+            // Set as main window - this is crucial for WPF
+            Current.MainWindow = mainWindow;
+            
+            // Temporarily comment out SetServices to test window visibility
+            // mainWindow.SetServices(
+            //     _host,
+            //     _host.Services.GetRequiredService<ILogger<MainWindow>>(),
+            //     _host.Services.GetRequiredService<IMidiService>(),
+            //     _host.Services.GetRequiredService<ISessionManager>(),
+            //     _host.Services.GetRequiredService<ISyncService>(),
+            //     _host.Services.GetRequiredService<AppSettings>());
+            // Temporarily disable system tray to test window visibility
+            // _systemTrayService.Initialize(mainWindow);
+            
+            // Force window to be visible and shown using multiple methods
+            mainWindow.Left = 100;
+            mainWindow.Top = 100;
+            mainWindow.Width = 800;
+            mainWindow.Height = 600;
+            mainWindow.WindowState = WindowState.Normal;
+            mainWindow.Visibility = Visibility.Visible;
+            mainWindow.Show();
+            mainWindow.Activate();
+            mainWindow.Focus();
+            mainWindow.BringIntoView();
+            
+            // Force the window to be on top temporarily
+            mainWindow.Topmost = true;
+            mainWindow.Topmost = false;
+            
+            // Use Windows API to force window to foreground
+            var windowHandle = new System.Windows.Interop.WindowInteropHelper(mainWindow).Handle;
+            ShowWindow(windowHandle, SW_RESTORE);
+            ShowWindow(windowHandle, SW_SHOW);
+            SetForegroundWindow(windowHandle);
+            
+            // Additional forced visibility
+            mainWindow.UpdateLayout();
+            mainWindow.InvalidateVisual();
+            
+            logger.LogInformation("MainWindow shown and activated");
 
             // Start MIDI service
             var midiService = _host.Services.GetRequiredService<IMidiService>();

@@ -5,7 +5,10 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
         Title="Piano Practice Journal" Height="600" Width="800"
-        WindowStartupLocation="CenterScreen">
+        WindowStartupLocation="CenterScreen"
+        Visibility="Visible"
+        ShowInTaskbar="True"
+        Topmost="False">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -157,8 +160,6 @@
                             <StackPanel Margin="10">
                                 <CheckBox x:Name="AutoStartCheckBox" Content="Auto-start with Windows" 
                                          Checked="AutoStartCheckBox_Changed" Unchecked="AutoStartCheckBox_Changed"/>
-                                <CheckBox x:Name="MinimizeToTrayCheckBox" Content="Minimize to system tray" 
-                                         Checked="MinimizeToTrayCheckBox_Changed" Unchecked="MinimizeToTrayCheckBox_Changed"/>
                             </StackPanel>
                         </GroupBox>
 

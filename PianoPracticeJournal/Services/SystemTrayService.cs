@@ -142,17 +142,12 @@ public class SystemTrayService : ISystemTrayService
 
     private void OnMainWindowStateChanged(object? sender, EventArgs e)
     {
-        if (_mainWindow?.WindowState == WindowState.Minimized)
-        {
-            HideToTray();
-        }
+        _logger.LogDebug("Main window state changed");
     }
 
     private void OnMainWindowClosing(object? sender, System.ComponentModel.CancelEventArgs e)
     {
-        // Cancel the close event and hide to tray instead
-        e.Cancel = true;
-        HideToTray();
+        _logger.LogDebug("Main window closing");
     }
 
     private void ExitApplication()

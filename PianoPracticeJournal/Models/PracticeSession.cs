@@ -41,8 +41,6 @@ public class AppSettings
     
     public bool AutoStartWithWindows { get; set; } = false;
     
-    public bool MinimizeToTray { get; set; } = true;
-    
     public string LogLevel { get; set; } = "Information";
 }
 
