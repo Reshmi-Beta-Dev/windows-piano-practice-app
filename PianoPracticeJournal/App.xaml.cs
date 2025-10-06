@@ -80,40 +80,38 @@ public partial class App : Application
             // Set as main window - this is crucial for WPF
             Current.MainWindow = mainWindow;
             
-            // Temporarily comment out SetServices to test window visibility
-            // mainWindow.SetServices(
-            //     _host,
-            //     _host.Services.GetRequiredService<ILogger<MainWindow>>(),
-            //     _host.Services.GetRequiredService<IMidiService>(),
-            //     _host.Services.GetRequiredService<ISessionManager>(),
-            //     _host.Services.GetRequiredService<ISyncService>(),
-            //     _host.Services.GetRequiredService<AppSettings>());
-            // Temporarily disable system tray to test window visibility
-            // _systemTrayService.Initialize(mainWindow);
-            
-            // Force window to be visible and shown using multiple methods
+            // Set window properties BEFORE showing
             mainWindow.Left = 100;
             mainWindow.Top = 100;
             mainWindow.Width = 800;
             mainWindow.Height = 600;
             mainWindow.WindowState = WindowState.Normal;
             mainWindow.Visibility = Visibility.Visible;
+            
+            // Show the window FIRST
             mainWindow.Show();
             mainWindow.Activate();
             mainWindow.Focus();
-            mainWindow.BringIntoView();
             
-            // Force the window to be on top temporarily
-            mainWindow.Topmost = true;
-            mainWindow.Topmost = false;
+            // Then set services
+            mainWindow.SetServices(
+                _host,
+                _host.Services.GetRequiredService<ILogger<MainWindow>>(),
+                _host.Services.GetRequiredService<IMidiService>(),
+                _host.Services.GetRequiredService<ISessionManager>(),
+                _host.Services.GetRequiredService<ISyncService>(),
+                _host.Services.GetRequiredService<AppSettings>());
             
-            // Use Windows API to force window to foreground
+            // Force window to foreground using Windows API
             var windowHandle = new System.Windows.Interop.WindowInteropHelper(mainWindow).Handle;
             ShowWindow(windowHandle, SW_RESTORE);
             ShowWindow(windowHandle, SW_SHOW);
             SetForegroundWindow(windowHandle);
             
-            // Additional forced visibility
+            // Additional visibility enforcement
+            mainWindow.BringIntoView();
+            mainWindow.Topmost = true;
+            mainWindow.Topmost = false;
             mainWindow.UpdateLayout();
             mainWindow.InvalidateVisual();
             
